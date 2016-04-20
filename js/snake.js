@@ -4,16 +4,17 @@ var Snake = function (length, cellWidth,ctx) {
   this.length = length;
   this.cellWidth = cellWidth;
   this.ctx = ctx;
-  this.key;
+  this.prevKey;
   this.CreateSnake();
 }
 
 Snake.prototype.CreateSnake = function(){
+  delete cells;
   this.cells = [];
   this.direction = "right";
-  this.length = this.defaultLength;
+  var length  = 5;
   //created so the head is in position [0]
-  for(var i = this.length-1; i>= 0;i--){
+  for(var i = length-1; i>= 0;i--){
     this.cells.push({x: i, y:0});
   }
 }
@@ -35,27 +36,46 @@ Snake.prototype.ManageLogic = function(){
   else if (this.direction == "left") this.Move(-1,0);
   else if (this.direction == "up") this.Move(0,-1);
   else if (this.direction == "down") this.Move(0,1);
+
 }
-Snake.prototype.ManageMovement = function(){
+Snake.prototype.ManageMovement = function(key){
   var dir = this.direction;
   //Prevent heading back onitself
-  if(this.key == "37" && dir != "right") this.direction = "left";
-  else if(this.key == "38" && dir != "down") this.direction  = "up";
-  else if(this.key == "39" && dir != "left") this.direction = "right";
-  else if(this.key == "40" && dir != "up") this.direction = "down";
+  if(key == "37" && dir != "right") this.direction = "left";
+  else if(key == "38" && dir != "down") this.direction  = "up";
+  else if(key == "39" && dir != "left") this.direction = "right";
+  else if(key == "40" && dir != "up") this.direction = "down";
+}
+Snake.prototype.isCollides = function(x,y){
+  for(var i = 0; i < this.cells.length; i++){
+    if(this.cells[i].x == x && this.cells[i].y == y)
+      return true;
+  }
+  return false;
+}
+Snake.prototype.BoundaryCheck = function(x,y){
+    head = this.cells[0];
+    if(x == -1 || y == -1 || x == 45 || y == 45)
+      return true;
+    return false;
 }
 //Move by x units in the X dir and Y units in the Y
 Snake.prototype.Move = function(x,y){
+    newX = this.cells[0].x + x;
+    newY = this.cells[0].y + y;
+    if(this.BoundaryCheck(newX,newY)){// || this.isCollides(newX,newY)){
+      this.CreateSnake();
+      return;
+    }
+
     var tail = this.cells.pop();
-    tail.x = this.cells[0].x + x; tail.y = this.cells[0].y +y;
+    tail.x = newX; tail.y = newY;
     this.cells.unshift(tail);
 }
-Snake.prototype.Update = function(key){
-  this.key = key;
-
+Snake.prototype.Update = function(){
   this.Paint();
   this.ManageLogic();
-  this.ManageMovement();
+
 }
 $(document).ready(function(){
 	var canvas = $("#canvas")[0];
@@ -73,10 +93,11 @@ $(document).ready(function(){
   }
   function RenderFrame(){
     PaintCanvas();
-    snake.Update(key);
+    snake.Update();
   }
   $(document).keydown(function(e){
     key = e.which;
+    snake.ManageMovement(key);
   })
 
   //every 60ms render the frame
