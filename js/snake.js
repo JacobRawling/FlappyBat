@@ -31,16 +31,10 @@ Snake.prototype.Paint = function(){
 }
 
 Snake.prototype.ManageLogic = function(){
-  //Move the snake a unit
-  var newX = this.cells[0].x, newY = this.cells[0].y;
-
-  if(this.direction == "right") newX++;
-  else if (this.direction == "left") newX--;
-  else if (this.direction == "up") newY--;
-  else if (this.direction == "down") newY++;
-
-  this.cells[0].x = newX;
-  this.cells[0].y = newY;
+  if(this.direction == "right") this.Move(1,0);
+  else if (this.direction == "left") this.Move(-1,0);
+  else if (this.direction == "up") this.Move(0,-1);
+  else if (this.direction == "down") this.Move(0,1);
 }
 Snake.prototype.ManageMovement = function(){
   var dir = this.direction;
@@ -49,6 +43,12 @@ Snake.prototype.ManageMovement = function(){
   else if(this.key == "38" && dir != "down") this.direction  = "up";
   else if(this.key == "39" && dir != "left") this.direction = "right";
   else if(this.key == "40" && dir != "up") this.direction = "down";
+}
+//Move by x units in the X dir and Y units in the Y
+Snake.prototype.Move = function(x,y){
+    var tail = this.cells.pop();
+    tail.x = this.cells[0].x + x; tail.y = this.cells[0].y +y;
+    this.cells.unshift(tail);
 }
 Snake.prototype.Update = function(key){
   this.key = key;
